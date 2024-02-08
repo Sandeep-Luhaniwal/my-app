@@ -4,7 +4,7 @@ import emailjs from '@emailjs/browser';
 import { st } from './Firebase';
 import { ref, uploadBytes } from 'firebase/storage';
 
-const From = () => {
+const FirebaseStore = () => {
     const userData = {
         firstName: '',
         lastName: '',
@@ -84,22 +84,6 @@ const From = () => {
         setError(errorShow);
         return Object.keys(errorShow).length === 0;
     };
-    const sendEmail = () => {
-        const userDetails = {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            // Add other relevant fields here
-        };
-
-        emailjs.send('service_vnvpiol', 'template_f5ens19', userDetails, '2ofUor669APLtRslp')
-            .then((response) => {
-                console.log('Email sent successfully!', response);
-            })
-            .catch((error) => {
-                console.error('Error sending email:', error);
-            });
-    };
     const fromSubmitHandler = async (e) => {
         e.preventDefault();
         if (validation()) {
@@ -122,7 +106,7 @@ const From = () => {
                     // Rest of your code...
                     const newData = { ...formData, uploadImage: imageShow };
                     setSubmittedData([...submittedData, newData]);
-                    sendEmail();
+                    
                     setFormData(userData);
                     setImageShow()
                 } catch (error) {
@@ -271,4 +255,4 @@ const From = () => {
     )
 }
 
-export default From
+export default FirebaseStore
