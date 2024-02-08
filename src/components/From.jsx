@@ -119,6 +119,7 @@ const From = () => {
         <>
             <div className="bg-black">
                 <div className="container max-w-[1140px] mx-auto bg-black min-h-screen p-10">
+                    <h1 className='text-white text-center pb-10 text-xl sm:text-3xl md:text-4xl font-bold'>Email Js Form Custom Validation</h1>
                     <form action="" onSubmit={(e) => fromSubmitHandler(e)} className='flex flex-col gap-6 justify-center items-center'>
                         <div className="w-full sm:w-1/2 flex flex-col items-center">
                             <input
@@ -216,17 +217,20 @@ const From = () => {
                     </form>
                     {
                         submittedData.map((value, index) => (
-                            <ul key={index} className='flex items-center h-[100px] justify-between mt-10 text-xl border'>
-                                <li className='text-white h-full ps-1 w-full flex items-center'>{value.firstName}</li>
-                                <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.lastName}</li>
-                                <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.email}</li>
-                                <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.password}</li>
-                                <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.confirmPassword}</li>
-                                {/* <li className='text-white border-l h-full ps-1 w-full flex items-center'>
-                                    {value.uploadImage && <img height={100} width={160} className='h-full w-full flex items-center' src={value.uploadImage} alt="img" />}
-                                </li> */}
-                                <button onClick={() => deleteData(index)} className='rounded-xl bg-pink-600 px-2 py-2 m-1'>delete data</button>
-                            </ul>
+                            <div key={index}>
+                                <h2 className='py-5 text-white font-2xl font-bold'>User Details</h2>
+                                <ul className='flex items-center h-[100px] justify-between text-xl border'>
+                                    <li className='text-white h-full ps-1 w-full flex items-center'>{value.firstName}</li>
+                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.lastName}</li>
+                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.email}</li>
+                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.password}</li>
+                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.confirmPassword}</li>
+                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>
+                                        {value.uploadImage && <img height={100} width={160} className='h-full w-full flex items-center' src={value.uploadImage} alt="img" />}
+                                    </li>
+                                    <button onClick={() => deleteData(index)} className='rounded-xl bg-pink-600 px-2 py-2 m-1'>delete data</button>
+                                </ul>
+                            </div>
                         ))
                     }
                 </div>
