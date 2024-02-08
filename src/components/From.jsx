@@ -80,16 +80,33 @@ const From = () => {
         setError(errorShow);
         return Object.keys(errorShow).length === 0;
     };
+    const sendEmail = () => {
+        const userData = {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            // Add other relevant fields here
+        };
+
+        emailjs.send('service_vnvpiol', 'template_f5ens19', userData, '2ofUor669APLtRslp')
+            .then((response) => {
+                console.log('Email sent successfully!', response);
+            })
+            .catch((error) => {
+                console.error('Error sending email:', error);
+            });
+    };
 
     const fromSubmitHandler = (e) => {
         e.preventDefault();
-        const isValid = validation();
-        if (isValid) {
+        if (validation()) {
             console.log('Form data:', formData);
             const newData = { ...formData, uploadImage: imageShow };
             setSubmittedData([...submittedData, newData]);
             setFormData(userData);
             setImageShow(null);
+            // Call the sendEmail function here
+            sendEmail();
         }
     };
     const deleteData = (index) => {
