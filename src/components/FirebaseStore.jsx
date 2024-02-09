@@ -151,8 +151,8 @@ const FirebaseStore = () => {
     return (
         <>
             <div className="bg-black">
-                <div className="container max-w-[1240px] mx-auto bg-black min-h-screen p-10">
-                    <h1 className='text-white text-center pb-10 text-xl sm:text-3xl md:text-4xl font-bold'>Email Js Form Custom Validation</h1>
+                <div className="container max-w-[1240px] mx-auto bg-black min-h-screen p-4 py-10 sm:p-10">
+                    <h1 className='text-white text-center pb-10 text-xl sm:text-3xl md:text-4xl font-bold'>Firebase database Form Custom Validation</h1>
                     <form action="" onSubmit={(e) => fromSubmitHandler(e)} className='flex flex-col gap-6 justify-center items-center'>
                         <div className="w-full sm:w-1/2 flex flex-col items-center">
                             <input
@@ -250,20 +250,26 @@ const FirebaseStore = () => {
                     </form>
                     {
                         submittedData.map((value, index) => (
-                            <div key={index}>
-                                <h2 className='py-5 text-white font-2xl font-bold'>User Details</h2>
-                                <ul className='flex items-center h-[100px] justify-between text-xl border'>
-                                    <li className='text-white h-full ps-1 w-full flex items-center'>{value.firstName}</li>
-                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.lastName}</li>
-                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.email}</li>
-                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.password}</li>
-                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.confirmPassword}</li>
-                                    <li className='text-white border-l h-full ps-1 w-full flex items-center'>
-                                        {value.uploadImage && <img height={100} width={100} className='h-full w-full flex items-center' src={value.uploadImage} alt="img" />}
-                                    </li>
-                                    <button onClick={() => deleteData(index)} className='rounded-xl bg-pink-600 px-2 py-2 m-1'>Delete</button>
-                                    <button onClick={() => editData(index)} className={`rounded-xl  px-2 py-2 m-1 ${editingIndex === index ? "bg-red-600" : "bg-pink-600"}`}>{editingIndex === index ? "Editing" : "Edit"}</button>
-                                </ul>
+                            <div key={index} className=''>
+                                <h2 className='py-5 text-white font-2xl font-bold'>User Details {value.firstName}</h2>
+                                <div className='flex flex-col md:flex-row items-center h-[250px] md:h-[103px] justify-between text-xl border'>
+                                    <div className='flex h-[100px] w-full'>
+                                        <p className='text-white h-full border-b md:border-b-0 ps-1 w-full flex items-center'>{value.firstName}</p>
+                                        <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.lastName}</p>
+                                        <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.password}</p>
+                                    </div>
+                                    <div className='h-[100px] flex w-full'>
+                                        <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.email}</p>
+                                        {/* <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.confirmPassword}</p> */}
+                                        <div className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>
+                                            {value.uploadImage && <img height={100} width={100} className='h-full w-full flex items-center' src={value.uploadImage} alt="img" />}
+                                        </div>
+                                    </div>
+                                    <div className='flex h-[50px] w-full md:w-1/3 justify-center'>
+                                        <button onClick={() => deleteData(index)} className='rounded-xl bg-pink-600 px-2 py-2 m-1 hover:bg-green-700'>Delete</button>
+                                        <button onClick={() => editData(index)} className={`rounded-xl  px-2 py-2 m-1 hover:bg-green-700 ${editingIndex === index ? "bg-red-600" : "bg-pink-600"}`}>{editingIndex === index ? "Editing" : "Edit"}</button>
+                                    </div>
+                                </div>
                             </div>
                         ))
                     }
