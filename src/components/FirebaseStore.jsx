@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import emailjs from '@emailjs/browser';
 // import { set } from 'firebase/database';
-import { st } from './Firebase';
-import { ref, uploadBytes } from 'firebase/storage';
+import { dbfs, st } from './Firebase';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 
 const FirebaseStore = () => {
     const userData = {
@@ -34,6 +35,8 @@ const FirebaseStore = () => {
         if (event.target.files && event.target.files[0]) {
             setFormData({ ...formData, uploadImage: event.target.files[0] });
             setImageShow(URL.createObjectURL(event.target.files[0]));
+        } else {
+            setImageShow(formData.uploadImage);
         }
     };
     const validateName = (name) => {
@@ -84,46 +87,49 @@ const FirebaseStore = () => {
         setError(errorShow);
         return Object.keys(errorShow).length === 0;
     };
+    const [isEditing, setIsEditing] = useState(false);
     const fromSubmitHandler = async (e) => {
         e.preventDefault();
         if (validation()) {
+            setIsEditing(false);
             console.log('Form data:', formData);
+            let downloadURL = ''; // Define downloadURL variable
+            const addUserData = async () => {
+                // Upload the file to Firebase Storage
+                const storageRef = ref(st, 'userImages/' + formData.uploadImage.name);
+                await uploadBytes(storageRef, formData.uploadImage);
 
-            // Check if formData.uploadImage is not undefined or null and has a name property
-            if (formData.uploadImage && formData.uploadImage.name) {
-                console.log('Uploading image...');
-                // Upload image to Firebase Storage
-                const imageRefPath = 'images/' + formData.uploadImage.name;
-                console.log('Image reference path:', imageRefPath);
-                const imageRef = ref(st, imageRefPath);
-                console.log('Image reference:', imageRef);
+                // Get the download URL for the uploaded file
+                downloadURL = await getDownloadURL(storageRef);
 
-                try {
-                    console.log('Uploading bytes...');
-                    console.log('Image reference:', imageRef); // Add this line for debugging
-                    await uploadBytes(imageRef, formData.uploadImage);
-                    console.log('Bytes uploaded successfully.');
-                    // Rest of your code...
-                    const newData = { ...formData, uploadImage: imageShow };
-                    setSubmittedData([...submittedData, newData]);
-                    
-                    setFormData(userData);
-                    setImageShow()
-                } catch (error) {
-                    console.error('Error uploading image:', error);
-                }
-
+                // Store the download URL in Firestore
+                // await setDoc(doc(dbfs, 'users/', formData.firstName), {
+                await addDoc(collection(dbfs, 'users'), {
+                    userfirstname: formData.firstName,
+                    userlastname: formData.lastName,
+                    useremail: formData.email,
+                    userpassword: formData.password,
+                    userconfirmPassword: formData.confirmPassword,
+                    useruploadImageURL: downloadURL, // Store the download URL instead of the file object
+                });
+            };
+            await addUserData();
+            const newData = { ...formData, uploadImage: downloadURL }; // Update the formData with the image URL
+            // setSubmittedData([...submittedData, newData]);
+            if (editingIndex !== null) {
+                // If editing an existing entry
+                const updatedSubmittedData = [...submittedData];
+                updatedSubmittedData[editingIndex] = newData;
+                setSubmittedData(updatedSubmittedData);
             } else {
-                console.error('No image selected');
-                // You can provide feedback to the user here, for example:
-                // setError({ uploadImage: 'Please select an image' });
+                // If adding a new entry
+                setSubmittedData([...submittedData, newData]);
             }
+            setFormData(userData);
+            setImageShow(null);
+            setEditingIndex(null)
         }
     };
-
-
-
-
 
     const deleteData = (index) => {
         const newData = [...submittedData];
@@ -131,10 +137,21 @@ const FirebaseStore = () => {
         setSubmittedData(newData);
         localStorage.setItem('submittedData', JSON.stringify(newData));
     };
+    const [editingIndex, setEditingIndex] = useState(null);
+    const editData = (index) => {
+        const dataToEdit = submittedData[index];
+        setFormData(dataToEdit);
+        if (dataToEdit.uploadImage) {
+            setImageShow(dataToEdit.uploadImage);
+        }
+        // setEditingIndex(index === editingIndex ? null : index);
+        setEditingIndex(index);
+        setIsEditing(true);
+    };
     return (
         <>
             <div className="bg-black">
-                <div className="container max-w-[1140px] mx-auto bg-black min-h-screen p-10">
+                <div className="container max-w-[1240px] mx-auto bg-black min-h-screen p-10">
                     <h1 className='text-white text-center pb-10 text-xl sm:text-3xl md:text-4xl font-bold'>Email Js Form Custom Validation</h1>
                     <form action="" onSubmit={(e) => fromSubmitHandler(e)} className='flex flex-col gap-6 justify-center items-center'>
                         <div className="w-full sm:w-1/2 flex flex-col items-center">
@@ -226,9 +243,9 @@ const FirebaseStore = () => {
                         </div>
                         <button
                             type='submit'
-                            className='px-3 py-2 bg-yellow-500 w-full sm:w-1/2 text-2xl font-bold text-white rounded-lg'
+                            className={`px-3 py-2 bg-yellow-500 w-full sm:w-1/2 text-2xl font-bold text-white rounded-lg ${isEditing ? "bg-green-600" : ""}`}
                         >
-                            Submit
+                            {isEditing ? "update" : "submit"}
                         </button>
                     </form>
                     {
@@ -242,9 +259,10 @@ const FirebaseStore = () => {
                                     <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.password}</li>
                                     <li className='text-white border-l h-full ps-1 w-full flex items-center'>{value.confirmPassword}</li>
                                     <li className='text-white border-l h-full ps-1 w-full flex items-center'>
-                                        {value.uploadImage && <img height={100} width={160} className='h-full w-full flex items-center' src={value.uploadImage} alt="img" />}
+                                        {value.uploadImage && <img height={100} width={100} className='h-full w-full flex items-center' src={value.uploadImage} alt="img" />}
                                     </li>
-                                    <button onClick={() => deleteData(index)} className='rounded-xl bg-pink-600 px-2 py-2 m-1'>delete data</button>
+                                    <button onClick={() => deleteData(index)} className='rounded-xl bg-pink-600 px-2 py-2 m-1'>Delete</button>
+                                    <button onClick={() => editData(index)} className={`rounded-xl  px-2 py-2 m-1 ${editingIndex === index ? "bg-red-600" : "bg-pink-600"}`}>{editingIndex === index ? "Editing" : "Edit"}</button>
                                 </ul>
                             </div>
                         ))
