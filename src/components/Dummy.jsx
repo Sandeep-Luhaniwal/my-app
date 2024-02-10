@@ -14,9 +14,6 @@ const FirebaseStore = () => {
         confirmPassword: '',
         uploadImage: '',
     }
-
-
-    // State variables
     const [formData, setFormData] = useState(userData);
     const [passwordShow, setPasswordShow] = useState(false);
     const [confrimPasswordShow, setConfrimPasswordShow] = useState(false);
@@ -26,18 +23,14 @@ const FirebaseStore = () => {
         const storedData = localStorage.getItem('submittedData');
         return storedData ? JSON.parse(storedData) : [];
     });
-    const [editingIndex, setEditingIndex] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [imageShow, setImageShow] = useState(null)
 
 
-    // Update local storage when submitted data changes
     useEffect(() => {
         localStorage.setItem('submittedData', JSON.stringify(submittedData));
     }, [submittedData]);
 
+    const [imageShow, setImageShow] = useState(null)
 
-    // Handle image change
     const onImageChange = (event) => {
         if (event.target.files && event.target.files[0]) {
             setFormData({ ...formData, uploadImage: event.target.files[0] });
@@ -46,23 +39,20 @@ const FirebaseStore = () => {
             setImageShow(formData.uploadImage);
         }
     };
-
-
-    // Validation functions
     const validateName = (name) => {
         const regex = /^[a-zA-Z]+$/;
         return regex.test(name);
     };
+
     const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     };
+
     const passwordMatch = () => {
         return formData.password === formData.confirmPassword;
     }
 
-
-    // Form validation
     const validation = () => {
         const errorShow = {};
         if (!formData.firstName.trim()) {
@@ -97,66 +87,64 @@ const FirebaseStore = () => {
         setError(errorShow);
         return Object.keys(errorShow).length === 0;
     };
-
-
-    // Upload user image
-    const userUploadImage = async (file) => {
-        const storageRef = ref(st, 'images/' + formData.uploadImage.name);
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-        return downloadURL;
-    };
-
-
-    // Handle form submission
+    const [isEditing, setIsEditing] = useState(false);
     const fromSubmitHandler = async (e) => {
         e.preventDefault();
         if (validation()) {
             setIsEditing(false);
-            let imageURL = formData.uploadImage;
-            if (formData.uploadImage instanceof File) {
-                imageURL = await userUploadImage(formData.uploadImage);
-            }
-            // await addDoc(collection(dbfs, 'users'), {
-            await setDoc(doc(dbfs, 'users/', formData.email), {
-                userfirstname: formData.firstName,
-                userlastname: formData.lastName,
-                useremail: formData.email,
-                userpassword: formData.password,
-                userconfirmPassword: formData.confirmPassword,
-                useruploadImageURL: imageURL, // Store the download URL instead of the file object
-            });
-            const newData = { ...formData, uploadImage: imageURL };
-            if (isEditing) {
-                const updatedData = [...submittedData];
-                updatedData[editingIndex] = newData;
-                setSubmittedData(updatedData);
+            console.log('Form data:', formData);
+            let downloadURL = ''; // Define downloadURL variable
+            const addUserData = async () => {
+                // Upload the file to Firebase Storage
+                const storageRef = ref(st, 'userImages/' + formData.uploadImage.name);
+                await uploadBytes(storageRef, formData.uploadImage);
+
+                // Get the download URL for the uploaded file
+                downloadURL = await getDownloadURL(storageRef);
+
+                // Store the download URL in Firestore
+                // await setDoc(doc(dbfs, 'users/', formData.firstName), {
+                await addDoc(collection(dbfs, 'users'), {
+                    userfirstname: formData.firstName,
+                    userlastname: formData.lastName,
+                    useremail: formData.email,
+                    userpassword: formData.password,
+                    userconfirmPassword: formData.confirmPassword,
+                    useruploadImageURL: downloadURL, // Store the download URL instead of the file object
+                });
+            };
+            await addUserData();
+            const newData = { ...formData, uploadImage: downloadURL }; // Update the formData with the image URL
+            // setSubmittedData([...submittedData, newData]);
+            if (editingIndex !== null) {
+                // If editing an existing entry
+                const updatedSubmittedData = [...submittedData];
+                updatedSubmittedData[editingIndex] = newData;
+                setSubmittedData(updatedSubmittedData);
             } else {
+                // If adding a new entry
                 setSubmittedData([...submittedData, newData]);
             }
             setFormData(userData);
             setImageShow(null);
-            setEditingIndex(null);
+            setEditingIndex(null)
         }
     };
 
-
-    // Delete data
     const deleteData = (index) => {
         const newData = [...submittedData];
         newData.splice(index, 1);
         setSubmittedData(newData);
         localStorage.setItem('submittedData', JSON.stringify(newData));
     };
-
-
-    // Edit data
+    const [editingIndex, setEditingIndex] = useState(null);
     const editData = (index) => {
         const dataToEdit = submittedData[index];
         setFormData(dataToEdit);
         if (dataToEdit.uploadImage) {
             setImageShow(dataToEdit.uploadImage);
         }
+        // setEditingIndex(index === editingIndex ? null : index);
         setEditingIndex(index);
         setIsEditing(true);
     };
@@ -248,7 +236,7 @@ const FirebaseStore = () => {
                                 <img
                                     alt="preview image"
                                     src={imageShow}
-                                    className={`${imageShow ? "max-h-10 max-w-10 rounded-full" : ""}`}
+                                    className={`${imageShow ? "max-h-10 max-w-10" : ""}`}
                                 />
                             }
                             {error.uploadImage && <p className="text-red-600">{error.uploadImage}</p>}
@@ -264,17 +252,17 @@ const FirebaseStore = () => {
                         submittedData.map((value, index) => (
                             <div key={index} className=''>
                                 <h2 className='py-5 text-white font-2xl font-bold'>User Details {value.firstName}</h2>
-                                <div className='flex flex-col md:flex-row items-center h-[200px] md:h-[82px] justify-between text-xl border'>
-                                    <div className='flex h-[80px] w-full'>
+                                <div className='flex flex-col md:flex-row items-center h-[250px] md:h-[103px] justify-between text-xl border'>
+                                    <div className='flex h-[100px] w-full'>
                                         <p className='text-white h-full border-b md:border-b-0 ps-1 w-full flex items-center'>{value.firstName}</p>
                                         <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.lastName}</p>
                                         <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.password}</p>
                                     </div>
-                                    <div className='h-[80px] flex w-full'>
+                                    <div className='h-[100px] flex w-full'>
                                         <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.email}</p>
                                         {/* <p className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>{value.confirmPassword}</p> */}
-                                        <div className='text-white border-l border-b md:border-b-0 h-full ps-1 w-[130px] flex items-center'>
-                                            {value.uploadImage && <img height={80} width={80} className=' h-20 w-20 flex items-center rounded-full' src={value.uploadImage} alt="img" />}
+                                        <div className='text-white border-l border-b md:border-b-0 h-full ps-1 w-full flex items-center'>
+                                            {value.uploadImage && <img height={100} width={100} className='h-full w-full flex items-center' src={value.uploadImage} alt="img" />}
                                         </div>
                                     </div>
                                     <div className='flex h-[50px] w-full md:w-1/3 justify-center'>
