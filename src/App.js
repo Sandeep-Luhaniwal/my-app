@@ -1,15 +1,19 @@
+
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import FirebaseStore from './components/FirebaseStore';
-import UploadImageData from './components/UploadImageData';
-// import From from './components/From';
+import Login from './components/auth/login/Login';
+import Signup from './components/auth/signup/Signup';
 
 function App() {
+
   return (
     <>
-      {/* <From /> */}
-      <FirebaseStore />
-      {/* <UploadImageData /> */}
-      
+      <div className=' bg-black min-h-screen'>
+        <Routes>
+          <Route path="/" exact element={<Signup />} />
+          <Route path="/login" exact element={<Login />} />
+        </Routes>
+      </div>
     </>
   );
 }
