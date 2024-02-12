@@ -99,7 +99,7 @@ const FirebaseStore = () => {
     };
 
 
-    // Upload user image
+    // Upload user image firebase storage
     const userUploadImage = async (file) => {
         const storageRef = ref(st, 'images/' + formData.uploadImage.name);
         await uploadBytes(storageRef, file);

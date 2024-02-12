@@ -14,7 +14,7 @@ const firebaseConfig = {
     messagingSenderId: "401699040091",
     appId: "1:401699040091:web:3491dde19355853458887e",
     databaseURL: "https://email-js-validation-default-rtdb.firebaseio.com/",
-    storageBucket: "gs://email-js-validation.appspot.com",
+    // storageBucket: "gs://email-js-validation.appspot.com",
 };
 
 // Initialize Firebase
