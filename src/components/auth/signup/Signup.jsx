@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
-import SucessFull from '../successfull/SucessFull';
+import React, { useEffect, useState } from 'react'
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../Firebase';
-import { Link } from 'react-router-dom';
-import Login from '../login/Login';
+import { auth, dbfs } from '../../Firebase';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { doc, setDoc } from 'firebase/firestore';
 
 const Signup = () => {
     const newuserData = {
@@ -19,12 +18,24 @@ const Signup = () => {
     const [passwordShow, setPasswordShow] = useState(false);
     const [confrimPasswordShow, setConfrimPasswordShow] = useState(false);
     const [error, setError] = useState({});
-    const [successMessage, setSuccessMessage] = useState(false);
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
     // Validation functions
     const validateName = (name) => {
         const regex = /^[a-zA-Z]+$/;
         return regex.test(name);
     };
+
+    useEffect(() => {
+        let timer;
+        if (registrationSuccess) {
+            // Set a timer to automatically close the success message after 5 seconds
+            timer = setTimeout(() => {
+                setRegistrationSuccess(false);
+            }, 5000); // 5000 milliseconds = 5 seconds
+        }
+        // Cleanup function to clear the timer when the component unmounts or when registrationSuccess changes
+        return () => clearTimeout(timer);
+    }, [registrationSuccess]);
     const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
@@ -32,8 +43,7 @@ const Signup = () => {
     const passwordMatch = () => {
         return formData.password === formData.confirmPassword;
     }
-
-
+    const navigate = useNavigate();
     // Form validation
     const validation = () => {
         const errorShow = {};
@@ -71,10 +81,19 @@ const Signup = () => {
         if (validation()) {
             try {
                 // Create user with email and password
-                const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+                await createUserWithEmailAndPassword(auth, formData.email, formData.password);
                 // Handle success
-                setSuccessMessage(true);
+                await setDoc(doc(dbfs, 'users/', formData.email), {
+                    userfirstname: formData.firstName,
+                    userlastname: formData.lastName,
+                    useremail: formData.email,
+                    userpassword: formData.password,
+                    userconfirmPassword: formData.confirmPassword,
+                    // useruploadImageURL: imageURL, // Store the download URL instead of the file object
+                });
+                // navigate("/successfull", { state: { formData } });
                 setFormData(newuserData);
+                setRegistrationSuccess(true);
             } catch (error) {
                 // Handle errors
                 const errorCode = error.code;
@@ -88,7 +107,7 @@ const Signup = () => {
     };
     return (
         <>
-            <div className={`container max-w-[1200px] mx-auto ${successMessage ? "hidden " : ""}`}>
+            <div className={`container max-w-[1200px] mx-auto px-4 }`}>
                 <div>
                     <form action=""
                         onSubmit={(e) => fromSubmitHandler(e)}
@@ -166,12 +185,20 @@ const Signup = () => {
                         </button>
                         <div className='flex'>
                             <span className='text-white me-1'>User have already Account</span>
-                            <Link className='text-white' to="/login">Login</Link>
+                            <Link className='text-red-600' to="/login">Login</Link>
                         </div>
                     </form>
                 </div>
             </div>
-            {successMessage && <SucessFull successMessage={successMessage} setSuccessMessage={setSuccessMessage} />}
+
+
+            {registrationSuccess && (
+                <div className='pt-10 flex justify-center px-4'>
+                    <p className='text-3xl font-bold text-red-800 font-mono'>
+                        New user registration successful!
+                    </p>
+                </div>
+            )}
         </>
     )
 }
