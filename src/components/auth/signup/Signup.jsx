@@ -19,6 +19,7 @@ const Signup = () => {
     const [confrimPasswordShow, setConfrimPasswordShow] = useState(false);
     const [error, setError] = useState({});
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
     // Validation functions
     const validateName = (name) => {
         const regex = /^[a-zA-Z]+$/;
@@ -43,7 +44,6 @@ const Signup = () => {
     const passwordMatch = () => {
         return formData.password === formData.confirmPassword;
     }
-    const navigate = useNavigate();
     // Form validation
     const validation = () => {
         const errorShow = {};
@@ -76,9 +76,16 @@ const Signup = () => {
         setError(errorShow);
         return Object.keys(errorShow).length === 0;
     };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setError(prevError => ({ ...prevError, [name]: '' }));
+        setFormData(prevFormData => ({ ...prevFormData, [name]: value }));
+    };
+
     const fromSubmitHandler = async (e) => {
         e.preventDefault();
         if (validation()) {
+            setLoading(true);
             try {
                 // Create user with email and password
                 await createUserWithEmailAndPassword(auth, formData.email, formData.password);
@@ -94,17 +101,24 @@ const Signup = () => {
                 // navigate("/successfull", { state: { formData } });
                 setFormData(newuserData);
                 setRegistrationSuccess(true);
+                setLoading(false);
+                
             } catch (error) {
                 // Handle errors
                 const errorCode = error.code;
-                const errorMessage = error.message;
+                let errorMessage = error.message; // Change const to let
                 // Handle specific errors if needed
-                console.error(errorCode, errorMessage);
+                if (errorCode === 'auth/email-already-in-use') {
+                    errorMessage = 'Email is already in use. Please use a different email address.';
+                }
                 // Update error state to display error message to the user
-                setError({ ...error, confirmPassword: errorMessage });
+                setError({ ...error, email: errorMessage });
+                setLoading(false);
             }
         }
     };
+
+
     return (
         <>
             <div className={`container max-w-[1200px] mx-auto px-4 pt-5`}>
@@ -117,7 +131,7 @@ const Signup = () => {
                                 type="text"
                                 placeholder='First Name'
                                 className='border-[2px] border-green-600 py-1 px-1 w-full'
-                                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                onChange={handleInputChange}
                                 value={formData.firstName}
                                 name='firstName'
                             />
@@ -128,7 +142,7 @@ const Signup = () => {
                                 type="text"
                                 placeholder='Last Name'
                                 className='border-[2px] border-green-600 py-1 px-1 w-full'
-                                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                onChange={handleInputChange}
                                 value={formData.lastName}
                                 name='lastName'
                             />
@@ -139,7 +153,7 @@ const Signup = () => {
                                 type="email"
                                 placeholder='Email Address'
                                 className='border-[2px] border-green-600 py-1 px-1 w-full'
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                onChange={handleInputChange}
                                 value={formData.email}
                                 name='email'
                             />
@@ -151,7 +165,7 @@ const Signup = () => {
                                     type={passwordShow ? "text" : "password"}
                                     placeholder='Enter 6 digit password'
                                     className='border-[2px] border-green-600 py-1 px-1 w-full'
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    onChange={handleInputChange}
                                     value={formData.password}
                                     maxLength={6}
                                     minLength={6}
@@ -167,11 +181,11 @@ const Signup = () => {
                                     type={confrimPasswordShow ? "text" : "password"}
                                     placeholder='Enter 6 digit confirm password'
                                     className='border-[2px] border-green-600 py-1 px-1 w-full'
-                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                    onChange={handleInputChange}
                                     value={formData.confirmPassword}
                                     maxLength={6}
                                     minLength={6}
-                                    name='confrimPassword'
+                                    name='confirmPassword'
                                 />
                                 <p onClick={() => setConfrimPasswordShow(!confrimPasswordShow)} className='text-red-600 absolute end-4 top-1/2 -translate-y-1/2 cursor-pointer'>{confrimPasswordShow ? "hide" : "show"}</p>
                             </div>
@@ -181,7 +195,17 @@ const Signup = () => {
                             type='submit'
                             className={`px-3 py-2 bg-yellow-500 w-full sm:w-1/2 text-2xl font-bold text-white rounded-lg `}
                         >
-                            Signup
+                            {loading ? (
+                                <div className="flex justify-center py-3 gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-white inline-block animate_wave"></span>
+                                    <span className="w-2 h-2 rounded-full bg-white inline-block animate_wave2"></span>
+                                    <span className="w-2 h-2 rounded-full bg-white inline-block animate_wave3"></span>
+                                </div>
+                            ) : (
+                                <>
+                                    Signup
+                                </>
+                            )}
                         </button>
                         <div className='flex'>
                             <span className='text-white me-1'>User have already Account</span>

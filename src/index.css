@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+
+.animate_wave {
+    animation: wave_bounce 700ms ease-in-out infinite alternate;
+}
+
+.animate_wave2 {
+    animation: wave_bounce 700ms ease-in-out 250ms infinite alternate;
+}
+
+.animate_wave3 {
+    animation: wave_bounce 700ms ease-in-out 500ms infinite alternate;
+}
+
+@keyframes wave_bounce {
+    0% {
+        transform: translateY(50%);
+    }
+
+    100% {
+        transform: translateY(-50%);
+    }
+}
