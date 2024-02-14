@@ -107,7 +107,7 @@ const Signup = () => {
     };
     return (
         <>
-            <div className={`container max-w-[1200px] mx-auto px-4 }`}>
+            <div className={`container max-w-[1200px] mx-auto px-4 pt-5`}>
                 <div>
                     <form action=""
                         onSubmit={(e) => fromSubmitHandler(e)}
@@ -188,6 +188,7 @@ const Signup = () => {
                             <Link className='text-red-600' to="/login">Login</Link>
                         </div>
                     </form>
+                    <Link className='text-blue-600 px-4 py-2 bg-white' to="/firebase">Firebase</Link>
                 </div>
             </div>
 

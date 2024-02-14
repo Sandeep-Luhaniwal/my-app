@@ -33,11 +33,9 @@ const Login = () => {
         console.log('No user data available');
       }
     } catch (error) {
-      // Handle error
-      console.error("Error logging in:", error);
+      setError(error.message);
+      console.error('Login error:', error);
     }
-
-
   };
 
   return (
@@ -70,9 +68,13 @@ const Login = () => {
             </div>
           </div>
           {error && <p className="text-red-600">{error}</p>}
+          <div className='flex justify-start w-full sm:w-1/2'>
+            <Link to="/forgot-password" className='text-white text-start'>Forget Paasword</Link>
+          </div>
           <div className="w-full sm:w-1/2 flex flex-col items-center">
             <button type="submit" className='bg-red-600 px-4 py-3 rounded-xl w-full'>Login</button>
           </div>
+          <Link to="/" className='text-white bg-pink-500 w-full sm:w-1/2 text-center py-2 px-3 rounded-xl'>Don't have an account? Sign Up</Link>
         </form>
       </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import emailjs from '@emailjs/browser';
+// import emailjs from '@emailjs/browser';
 // import { set } from 'firebase/database';
 import { dbfs, st } from './Firebase';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
@@ -27,6 +27,7 @@ const FirebaseStore = () => {
         return storedData ? JSON.parse(storedData) : [];
     });
     const [editingIndex, setEditingIndex] = useState(null);
+    
     const [isEditing, setIsEditing] = useState(false);
     const [imageShow, setImageShow] = useState(null)
 
@@ -164,7 +165,7 @@ const FirebaseStore = () => {
         <>
             <div className="bg-black">
                 <div className="container max-w-[1240px] mx-auto bg-black min-h-screen p-4 py-10 sm:p-10">
-                    <h1 className='text-white text-center pb-10 text-xl sm:text-3xl md:text-4xl font-bold'>Firebase database Form Custom Validation</h1>
+                    <h1 className='text-white text-center pb-10 text-xl sm:text-3xl md:text-4xl font-bold'>Firestore database Form Custom Validation</h1>
                     <form action="" onSubmit={(e) => fromSubmitHandler(e)} className='flex flex-col gap-6 justify-center items-center'>
                         <div className="w-full sm:w-1/2 flex flex-col items-center">
                             <input
