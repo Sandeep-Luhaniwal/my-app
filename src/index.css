@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 .animate_wave {
     animation: wave_bounce 700ms ease-in-out infinite alternate;
 }
